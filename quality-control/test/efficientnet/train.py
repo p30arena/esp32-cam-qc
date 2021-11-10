@@ -128,7 +128,10 @@ print("initial accuracy: {:.2f}".format(accuracy0))
 initial_epochs = 200
 history = model.fit(train_dataset,
                     epochs=initial_epochs,
-                    validation_data=validation_dataset)
+                    validation_data=validation_dataset,
+                    callbacks=tf.keras.callbacks.EarlyStopping(
+                        verbose=1, patience=30),
+                    )
 
 model.save(model_path)
 
