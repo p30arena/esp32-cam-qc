@@ -14,16 +14,20 @@ train_dir = os.path.join(PATH, 'train')
 validation_dir = os.path.join(PATH, 'validation')
 
 BATCH_SIZE = 32
-IMG_SIZE = (96, 96)
+IMG_SIZE = (240, 240)
 
 train_dataset = tf.keras.utils.image_dataset_from_directory(train_dir,
                                                             shuffle=True,
                                                             batch_size=BATCH_SIZE,
-                                                            image_size=IMG_SIZE)
+                                                            image_size=IMG_SIZE,
+                                                            color_mode='grayscale',
+                                                            )
 validation_dataset = tf.keras.utils.image_dataset_from_directory(validation_dir,
                                                                  shuffle=True,
                                                                  batch_size=BATCH_SIZE,
-                                                                 image_size=IMG_SIZE)
+                                                                 image_size=IMG_SIZE,
+                                                                 color_mode='grayscale',
+                                                                 )
 class_names = train_dataset.class_names
 
 # plt.figure(figsize=(10, 10))
@@ -70,36 +74,41 @@ data_augmentation = tf.keras.Sequential([
 # rescale = tf.keras.layers.Rescaling(1./127.5, offset=-1) # scales [0, 255] to [-1, 1]
 
 # Create the base model from the pre-trained model MobileNet V2
-IMG_SHAPE = IMG_SIZE + (3,)
+IMG_SHAPE = IMG_SIZE + (1,)
 if model_path.exists():
     model = tf.keras.models.load_model(model_path)
 else:
     # https://www.tensorflow.org/guide/keras/sequential_model
+    # model = tf.keras.models.Sequential([
+    #     tf.keras.layers.Input(shape=IMG_SHAPE),
+    #     tf.keras.layers.Conv2D(32, 3, activation='relu'),
+    #     tf.keras.layers.Conv2D(32, 3, activation='relu'),
+    #     tf.keras.layers.MaxPooling2D(3),
+    #     tf.keras.layers.Conv2D(32, 3, activation='relu'),
+    #     tf.keras.layers.Conv2D(32, 3, activation='relu'),
+    #     tf.keras.layers.MaxPooling2D(3),
+    #     tf.keras.layers.Conv2D(32, 3, activation='relu'),
+    #     tf.keras.layers.Conv2D(32, 3, activation='relu'),
+    #     tf.keras.layers.MaxPooling2D(2),
+    #     tf.keras.layers.Dropout(0.5),
+    #     tf.keras.layers.Flatten(),
+    #     tf.keras.layers.Dense(2),
+    # ])
     model = tf.keras.models.Sequential([
         tf.keras.layers.Input(shape=IMG_SHAPE),
-        tf.keras.layers.Conv2D(16, 3, activation='relu'),
-        tf.keras.layers.Conv2D(16, 3, activation='relu'),
+        tf.keras.layers.Conv2D(8, 3, activation='relu'),
+        tf.keras.layers.Conv2D(8, 3, activation='relu'),
         tf.keras.layers.MaxPooling2D(3),
-        tf.keras.layers.Conv2D(16, 3, activation='relu'),
-        tf.keras.layers.Conv2D(16, 3, activation='relu'),
+        tf.keras.layers.Conv2D(8, 3, activation='relu'),
+        tf.keras.layers.Conv2D(8, 3, activation='relu'),
         tf.keras.layers.MaxPooling2D(3),
-        tf.keras.layers.Conv2D(16, 3, activation='relu'),
-        tf.keras.layers.Conv2D(16, 3, activation='relu'),
+        tf.keras.layers.Conv2D(8, 3, activation='relu'),
+        tf.keras.layers.Conv2D(8, 3, activation='relu'),
         tf.keras.layers.MaxPooling2D(2),
         tf.keras.layers.Dropout(0.5),
         tf.keras.layers.Flatten(),
         tf.keras.layers.Dense(2),
     ])
-    # model = tf.keras.models.Sequential([
-    #     tf.keras.layers.Input(shape=IMG_SHAPE),
-    #     tf.keras.layers.Conv2D(16, 3, activation='relu'),
-    #     tf.keras.layers.MaxPooling2D(),
-    #     tf.keras.layers.Conv2D(32, 3, activation='relu'),
-    #     tf.keras.layers.MaxPooling2D(),
-    #     tf.keras.layers.Dropout(0.5),
-    #     tf.keras.layers.Flatten(),
-    #     tf.keras.layers.Dense(2),
-    # ])
     model = tfmot.quantization.keras.quantize_model(model)
 
 base_learning_rate = 0.001

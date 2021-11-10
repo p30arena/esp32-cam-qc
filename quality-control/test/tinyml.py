@@ -10,12 +10,14 @@ train_dir = os.path.join(PATH, 'train')
 validation_dir = os.path.join(PATH, 'validation')
 
 BATCH_SIZE = 1
-IMG_SIZE = (96, 96)
+IMG_SIZE = (240, 240)
 
 train_dataset = tf.keras.utils.image_dataset_from_directory(train_dir,
                                                             shuffle=True,
                                                             batch_size=BATCH_SIZE,
-                                                            image_size=IMG_SIZE)
+                                                            image_size=IMG_SIZE,
+                                                            color_mode='grayscale',
+                                                            )
 
 AUTOTUNE = tf.data.AUTOTUNE
 

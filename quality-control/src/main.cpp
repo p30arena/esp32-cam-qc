@@ -161,10 +161,11 @@ void setup_camera()
   config.pin_pwdn = PWDN_GPIO_NUM;
   config.pin_reset = RESET_GPIO_NUM;
   config.xclk_freq_hz = 20000000;
-  config.pixel_format = PIXFORMAT_JPEG;
+  // config.pixel_format = PIXFORMAT_JPEG;
+  config.pixel_format = PIXFORMAT_GRAYSCALE;
 
-  config.frame_size = FRAMESIZE_96X96;
-  config.jpeg_quality = 8;
+  config.frame_size = FRAMESIZE_240X240;
+  // config.jpeg_quality = 8;
   config.fb_count = 1;
 
   // camera init
