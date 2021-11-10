@@ -9,6 +9,8 @@
 #include "model.h"
 #include "creds.h"
 
+#define LAMP 4
+
 // Select camera model
 #define CAMERA_MODEL_AI_THINKER // Has PSRAM
 
@@ -61,6 +63,8 @@ void captureTask(void *param)
       CheckForConnections();
     }
 
+    // digitalWrite(LAMP, HIGH);
+
     // Take Picture with Camera
     fb = esp_camera_fb_get();
     if (!fb)
@@ -68,6 +72,8 @@ void captureTask(void *param)
       Serial.println("Camera capture failed");
       continue;
     }
+
+    // digitalWrite(LAMP, LOW);
 
     for (int i = 0; i < fb->len; i++)
     {
@@ -122,6 +128,9 @@ void processTask(void *param)
 
 void setup()
 {
+  setCpuFrequencyMhz(160);
+
+  // pinMode(LAMP, OUTPUT);
   Serial.begin(115200);
   Serial.setDebugOutput(true);
   Serial.println();
@@ -184,6 +193,8 @@ void setup_camera()
     s->set_brightness(s, 1);  // up the brightness just a bit
     s->set_saturation(s, -2); // lower the saturation
   }
+
+  Serial.println(s->id.PID);
 }
 
 void setup_tflite()

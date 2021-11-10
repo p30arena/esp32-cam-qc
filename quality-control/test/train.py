@@ -96,14 +96,14 @@ else:
     # ])
     model = tf.keras.models.Sequential([
         tf.keras.layers.Input(shape=IMG_SHAPE),
-        tf.keras.layers.Conv2D(8, 3, activation='relu'),
-        tf.keras.layers.Conv2D(8, 3, activation='relu'),
+        tf.keras.layers.Conv2D(4, 3, activation='relu'),
+        tf.keras.layers.Conv2D(4, 3, activation='relu'),
         tf.keras.layers.MaxPooling2D(3),
-        tf.keras.layers.Conv2D(8, 3, activation='relu'),
-        tf.keras.layers.Conv2D(8, 3, activation='relu'),
+        tf.keras.layers.Conv2D(4, 3, activation='relu'),
+        tf.keras.layers.Conv2D(4, 3, activation='relu'),
         tf.keras.layers.MaxPooling2D(3),
-        tf.keras.layers.Conv2D(8, 3, activation='relu'),
-        tf.keras.layers.Conv2D(8, 3, activation='relu'),
+        tf.keras.layers.Conv2D(4, 3, activation='relu'),
+        tf.keras.layers.Conv2D(4, 3, activation='relu'),
         tf.keras.layers.MaxPooling2D(2),
         tf.keras.layers.Dropout(0.5),
         tf.keras.layers.Flatten(),
@@ -124,7 +124,7 @@ history = model.fit(train_dataset,
                     epochs=initial_epochs,
                     validation_data=validation_dataset,
                     callbacks=tf.keras.callbacks.EarlyStopping(
-                        verbose=1, patience=10),
+                        verbose=1, patience=30),
                     )
 
 model.save(model_path)
