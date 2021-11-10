@@ -30,7 +30,7 @@ void setup()
   config.xclk_freq_hz = 20000000;
   config.pixel_format = PIXFORMAT_JPEG;
 
-  config.frame_size = FRAMESIZE_QVGA;
+  config.frame_size = FRAMESIZE_240X240;
   config.jpeg_quality = 8;
   config.fb_count = 1;
 
