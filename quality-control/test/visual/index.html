@@ -13,12 +13,19 @@
 
     socket.on('image_data', (data) => {
       const converted = [];
-      const gray_pixels = new Uint8ClampedArray(data);
-      for (let i = 0; i < gray_pixels.length; i++) {
-        converted.push(gray_pixels[i]);
-        converted.push(gray_pixels[i]);
-        converted.push(gray_pixels[i]);
-        converted.push(gray_pixels[i]);
+      // const gray_pixels = new Uint8ClampedArray(data);
+      // for (let i = 0; i < gray_pixels.length; i++) {
+      //   converted.push(gray_pixels[i]);
+      //   converted.push(gray_pixels[i]);
+      //   converted.push(gray_pixels[i]);
+      //   converted.push(gray_pixels[i]);
+      // }
+      const rgb_pixels = new Uint8ClampedArray(data);
+      for (let i = 0; i < rgb_pixels.length; i += 3) {
+        converted.push(rgb_pixels[i + 2]);
+        converted.push(rgb_pixels[i + 1]);
+        converted.push(rgb_pixels[i]);
+        converted.push(255);
       }
       const pixels = new Uint8ClampedArray(converted);
       const imageData = ctx.createImageData(240, 240);

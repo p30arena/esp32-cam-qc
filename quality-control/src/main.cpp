@@ -75,9 +75,20 @@ void captureTask(void *param)
 
     // digitalWrite(LAMP, LOW);
 
-    for (int i = 0; i < fb->len; i++)
+    // for (int i = 0; i < fb->len; i++)
+    // {
+    //   model_input_buffer[i] = fb->buf[i] - 128;
+    // }
+
+    for (int i = 0; i < 240 * 240; i++)
     {
-      model_input_buffer[i] = fb->buf[i] - 128;
+      int pxIdx = i * 3;
+      // data is in BGR format not RGB
+      uint8_t b = fb->buf[i];
+      uint8_t g = fb->buf[i + 1];
+      uint8_t r = fb->buf[i + 2];
+      double l = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      model_input_buffer[i] = (uint8_t)(l + 0.5) - 128;
     }
 
     xTaskNotify(processTaskHandle, 1, eSetValueWithOverwrite);
@@ -170,11 +181,10 @@ void setup_camera()
   config.pin_pwdn = PWDN_GPIO_NUM;
   config.pin_reset = RESET_GPIO_NUM;
   config.xclk_freq_hz = 20000000;
-  // config.pixel_format = PIXFORMAT_JPEG;
-  config.pixel_format = PIXFORMAT_GRAYSCALE;
+  config.pixel_format = PIXFORMAT_RGB888;
+  // config.pixel_format = PIXFORMAT_GRAYSCALE;
 
   config.frame_size = FRAMESIZE_240X240;
-  // config.jpeg_quality = 8;
   config.fb_count = 1;
 
   // camera init

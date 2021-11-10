@@ -21,7 +21,8 @@ client.on('close', () => {
 });
 
 client.on('data', (data) => {
-  const pkt_len = 57600;
+  // const pkt_len = 57600;
+  const pkt_len = 172800;
 
   const n_want = Math.min(pkt_len - browser_data.length, data.length);
   browser_data = Buffer.concat([browser_data, data.slice(0, n_want)]);
