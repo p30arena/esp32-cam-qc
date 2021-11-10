@@ -74,7 +74,7 @@ void captureTask(void *param)
       model_input_buffer[i] = fb->buf[i] - 128;
     }
 
-    xTaskNotify(processTaskHandle, 1, eIncrement);
+    xTaskNotify(processTaskHandle, 1, eSetValueWithOverwrite);
 
     if (wifiConnected && RemoteClient.connected())
     {
@@ -92,8 +92,9 @@ void processTask(void *param)
   const TickType_t xMaxBlockTime = pdMS_TO_TICKS(100);
   while (true)
   {
+    // pdTRUE - set value 0
     uint32_t ulNotificationValue = ulTaskNotifyTake(pdTRUE, xMaxBlockTime);
-    if (ulNotificationValue > 0)
+    if (ulNotificationValue == 1)
     {
       TfLiteStatus invoke_status = interpreter->Invoke();
       if (invoke_status != kTfLiteOk)
