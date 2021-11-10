@@ -13,7 +13,7 @@ train_dir = os.path.join(PATH, 'train')
 validation_dir = os.path.join(PATH, 'validation')
 
 BATCH_SIZE = 32
-IMG_SIZE = (240, 240)
+IMG_SIZE = (96, 96)
 
 train_dataset = tf.keras.utils.image_dataset_from_directory(train_dir,
                                                             shuffle=True,
