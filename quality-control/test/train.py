@@ -119,12 +119,12 @@ model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=base_learning_rat
 
 model.summary()
 
-initial_epochs = 100
+initial_epochs = 50
 history = model.fit(train_dataset,
                     epochs=initial_epochs,
                     validation_data=validation_dataset,
                     callbacks=tf.keras.callbacks.EarlyStopping(
-                        verbose=1, patience=30),
+                        verbose=1, patience=10),
                     )
 
 model.save(model_path)

@@ -125,7 +125,7 @@ loss0, accuracy0 = model.evaluate(validation_dataset)
 print("initial loss: {:.2f}".format(loss0))
 print("initial accuracy: {:.2f}".format(accuracy0))
 
-initial_epochs = 200
+initial_epochs = 600
 history = model.fit(train_dataset,
                     epochs=initial_epochs,
                     validation_data=validation_dataset,
@@ -133,7 +133,8 @@ history = model.fit(train_dataset,
                         verbose=1, patience=30),
                     )
 
-model.save(model_path)
+model.save(model_path, options=tf.saved_model.SaveOptions(
+    experimental_custom_gradients=True))
 
 acc = history.history['accuracy']
 val_acc = history.history['val_accuracy']
