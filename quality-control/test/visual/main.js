@@ -5,6 +5,14 @@ const http = require('http');
 const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
+const { Interpreter } = require("node-tflite");
+
+const model = new Interpreter(require('fs').readFileSync("../efficientnet/out/model-backup/model.tflite"));
+model.allocateTensors();
+
+function sigmoid(x) {
+  return 1 / (1 + Math.exp(-x));
+}
 
 let browser_socket;
 let browser_data = Buffer.from([]);
@@ -29,6 +37,13 @@ client.on('data', (data) => {
 
   if (browser_socket && browser_data.length == pkt_len) {
     browser_socket.emit('image_data', browser_data);
+    model.inputs[0].copyFrom(browser_data);
+    model.invoke();
+    const res = new Int8Array(1);
+    model.outputs[0].copyTo(res);
+    const prob = sigmoid(res);
+    const lbl = ["error", "ok"][prob < 0.5 ? 0 : 1];
+    console.log(lbl);
   }
 
   if (browser_data.length == pkt_len) {

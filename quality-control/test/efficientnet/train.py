@@ -49,9 +49,24 @@ train_dataset = train_dataset.prefetch(buffer_size=AUTOTUNE)
 validation_dataset = validation_dataset.prefetch(buffer_size=AUTOTUNE)
 test_dataset = test_dataset.prefetch(buffer_size=AUTOTUNE)
 
+
+class RandomSaturationLayer(tf.keras.layers.Layer):
+    def __init__(self, factor):
+        super(RandomSaturationLayer, self).__init__()
+        self.factor = factor
+
+    def build(self, input_shape):
+        pass
+
+    def call(self, inputs):
+        return tf.image.random_saturation(inputs, self.factor[0], self.factor[1])
+
+
 data_augmentation = tf.keras.Sequential([
     tf.keras.layers.RandomFlip('horizontal'),
-    tf.keras.layers.RandomRotation(0.2),
+    tf.keras.layers.RandomRotation(0.02),
+    # tf.keras.layers.RandomZoom((-0.1, -0.0)),
+    RandomSaturationLayer((0.1, 1.0)),
 ])
 
 # for image, _ in train_dataset.take(1):
@@ -63,6 +78,7 @@ data_augmentation = tf.keras.Sequential([
 #         plt.imshow(augmented_image[0] / 255)
 #         plt.axis('off')
 # plt.show()
+# exit(0)
 
 # efficientnet expects floating [0, 255]
 # preprocess_input = tf.keras.applications.mobilenet_v2.preprocess_input

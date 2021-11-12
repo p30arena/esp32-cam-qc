@@ -11,6 +11,7 @@ validation_dir = os.path.join(PATH, 'validation')
 
 BATCH_SIZE = 1
 IMG_SIZE = (240, 240)
+IMG_SHAPE = IMG_SIZE + (3,)
 
 train_dataset = tf.keras.utils.image_dataset_from_directory(train_dir,
                                                             shuffle=True,
@@ -30,9 +31,16 @@ def representative_dataset():
 
 if model_path.exists():
     model = tf.keras.models.load_model(model_path)
+    model = tf.keras.Sequential([
+        model.layers[0],  # input
+        model.layers[2],  # efficientnetb0
+        model.layers[3],  # global_avg_pooling2d
+        model.layers[5],  # dense
+    ])
 else:
     print("you must first run trian.py")
     exit(1)
+
 converter = tf.lite.TFLiteConverter.from_keras_model(model)
 converter.optimizations = [tf.lite.Optimize.DEFAULT]
 converter.representative_dataset = representative_dataset

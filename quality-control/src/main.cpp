@@ -199,12 +199,17 @@ void setup_camera()
   // initial sensors are flipped vertically and colors are a bit saturated
   if (s->id.PID == OV3660_PID)
   {
+    Serial.println("OV3660_PID");
     s->set_vflip(s, 1);       // flip it back
     s->set_brightness(s, 1);  // up the brightness just a bit
     s->set_saturation(s, -2); // lower the saturation
   }
-
-  Serial.println(s->id.PID);
+  else if (s->id.PID == OV2640_PID)
+  {
+    Serial.println("OV2640_PID");
+    s->set_brightness(s, 1);
+    s->set_saturation(s, 0); // higher the saturation
+  }
 }
 
 void setup_tflite()
