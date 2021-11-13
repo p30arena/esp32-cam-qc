@@ -25,18 +25,26 @@
       //   converted.push(gray_pixels[i]);
       // }
       const rgb_pixels = new Uint8ClampedArray(data);
-      for (let i = 0; i < rgb_pixels.length; i += 3) {
-        // converted.push(rgb_pixels[i + 2]);
-        // converted.push(rgb_pixels[i + 1]);
-        // converted.push(rgb_pixels[i]);
-        // converted.push(255);
-        converted.push(rgb_pixels[i]);
-        converted.push(rgb_pixels[i + 1]);
-        converted.push(rgb_pixels[i + 2]);
-        converted.push(255);
+      const is240 = rgb_pixels.length == 240 * 240 * 3;
+      if (is240) {
+        // 240x240 RGB
+        for (let i = 0; i < rgb_pixels.length; i += 3) {
+          converted.push(rgb_pixels[i]);
+          converted.push(rgb_pixels[i + 1]);
+          converted.push(rgb_pixels[i + 2]);
+          converted.push(255);
+        }
+      } else {
+        // 96x96 BGR
+        for (let i = 0; i < rgb_pixels.length; i += 3) {
+          converted.push(rgb_pixels[i + 2]);
+          converted.push(rgb_pixels[i + 1]);
+          converted.push(rgb_pixels[i]);
+          converted.push(255);
+        }
       }
       const pixels = new Uint8ClampedArray(converted);
-      const imageData = ctx.createImageData(240, 240);
+      const imageData = ctx.createImageData(is240 ? 240 : 96, is240 ? 240 : 96);
       imageData.data.set(pixels);
       ctx.putImageData(imageData, 0, 0);
     });

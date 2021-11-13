@@ -80,7 +80,7 @@ void captureTask(void *param)
     //   model_input_buffer[i] = fb->buf[i] - 128;
     // }
 
-    for (int i = 0; i < 240 * 240; i++)
+    for (int i = 0; i < 96 * 96; i++)
     {
       int pxIdx = i * 3;
       // data is in BGR format not RGB
@@ -184,7 +184,7 @@ void setup_camera()
   config.pixel_format = PIXFORMAT_RGB888;
   // config.pixel_format = PIXFORMAT_GRAYSCALE;
 
-  config.frame_size = FRAMESIZE_240X240;
+  config.frame_size = FRAMESIZE_96X96;
   config.fb_count = 1;
 
   // camera init
