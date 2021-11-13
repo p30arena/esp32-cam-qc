@@ -5,14 +5,9 @@ const http = require('http');
 const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
-const { Interpreter } = require("node-tflite");
-
-const model = new Interpreter(require('fs').readFileSync("../efficientnet/out/model-backup/model.tflite"));
-model.allocateTensors();
-
-function sigmoid(x) {
-  return 1 / (1 + Math.exp(-x));
-}
+const cp = require('child_process');
+const n = cp.fork(`${__dirname}/process.js`);
+let can_process = true;
 
 let browser_socket;
 let browser_data = Buffer.from([]);
@@ -20,12 +15,17 @@ let browser_data = Buffer.from([]);
 const client = new net.Socket();
 client.setTimeout(8000);
 
-client.connect(8840, '192.168.1.92', () => {
+client.connect(8840, '192.168.1.158', () => {
   console.log('Connected');
 });
 
 client.on('close', () => {
   console.log('Connection closed');
+});
+
+n.on('message', (m) => {
+  can_process = true;
+  browser_socket.emit('process_result', m);
 });
 
 client.on('data', (data) => {
@@ -37,13 +37,10 @@ client.on('data', (data) => {
 
   if (browser_socket && browser_data.length == pkt_len) {
     browser_socket.emit('image_data', browser_data);
-    model.inputs[0].copyFrom(browser_data);
-    model.invoke();
-    const res = new Int8Array(1);
-    model.outputs[0].copyTo(res);
-    const prob = sigmoid(res);
-    const lbl = ["error", "ok"][prob < 0.5 ? 0 : 1];
-    console.log(lbl);
+    if (can_process) {
+      n.send(browser_data);
+      can_process = false;
+    }
   }
 
   if (browser_data.length == pkt_len) {

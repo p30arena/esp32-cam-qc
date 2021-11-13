@@ -6,10 +6,14 @@
 
 <body>
   <canvas id="canvas" width="240" height="240"></canvas>
+  <h3 id="process_result"></h3>
   <script>
+    const process_result_text = document.getElementById("process_result");
     const ctx = document.getElementById("canvas").getContext('2d');
     const socket = io();
     socket.binaryType = 'arraybuffer';
+
+    socket.on('process_result', (result) => process_result_text.textContent = (new Date().toTimeString().split(' ')[0]) + ' - ' + result);
 
     socket.on('image_data', (data) => {
       const converted = [];
@@ -22,9 +26,13 @@
       // }
       const rgb_pixels = new Uint8ClampedArray(data);
       for (let i = 0; i < rgb_pixels.length; i += 3) {
-        converted.push(rgb_pixels[i + 2]);
-        converted.push(rgb_pixels[i + 1]);
+        // converted.push(rgb_pixels[i + 2]);
+        // converted.push(rgb_pixels[i + 1]);
+        // converted.push(rgb_pixels[i]);
+        // converted.push(255);
         converted.push(rgb_pixels[i]);
+        converted.push(rgb_pixels[i + 1]);
+        converted.push(rgb_pixels[i + 2]);
         converted.push(255);
       }
       const pixels = new Uint8ClampedArray(converted);
