@@ -207,8 +207,11 @@ void setup_camera()
   else if (s->id.PID == OV2640_PID)
   {
     Serial.println("OV2640_PID");
-    s->set_brightness(s, 1);
-    s->set_saturation(s, 0); // higher the saturation
+    s->set_brightness(s, 0);
+    s->set_saturation(s, 0);
+    s->set_contrast(s, 1);
+    s->set_sharpness(s, 1);
+    s->set_denoise(s, 1);
   }
 }
 
