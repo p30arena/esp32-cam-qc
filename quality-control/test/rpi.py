@@ -10,6 +10,7 @@ import math
 from threading import Thread
 import socket
 import select
+import multiprocessing
 
 from PIL import Image
 from tflite_runtime.interpreter import Interpreter
@@ -44,25 +45,46 @@ def classify_image(interpreter, image, top_k=1):
     return label_id, pred
 
 
-def main():
-    global running, conected_socket
+def worker(master_queue: multiprocessing.Queue, worker_queue: multiprocessing.Queue):
     labels = load_labels()
-
     interpreter = Interpreter('model.tflite')
     interpreter.allocate_tensors()
     _, height, width, _ = interpreter.get_input_details()[0]['shape']
 
-    with picamera.PiCamera(resolution=(240, 240), framerate=30) as camera:
-        # camera.start_preview()
-        try:
+    worker_queue.put((width, height))
+
+    while True:
+        image = master_queue.get(True, None)
+        if image == False:
+            break
+        start_time = time.time()
+        label_id, prob = classify_image(interpreter, image)
+        elapsed_ms = (time.time() - start_time) * 1000
+        worker_queue.put((labels[label_id], prob, elapsed_ms))
+
+
+def main():
+    global running, conected_socket
+
+    master_queue = multiprocessing.Queue()
+    worker_queue = multiprocessing.Queue()
+    p = multiprocessing.Process(target=worker, args=(
+        master_queue, worker_queue))
+    p.start()
+
+    width, height = worker_queue.get(True, None)
+
+    try:
+        with picamera.PiCamera(resolution=(width, height), framerate=30) as camera:
             stream = io.BytesIO()
             for _ in camera.capture_continuous(
                     stream, format='jpeg', use_video_port=True):
                 if not running:
                     break
                 stream.seek(0)
-                image = Image.open(stream).convert('RGB').resize((width, height),
-                                                                 Image.ANTIALIAS)
+                image = Image.open(stream).convert('RGB')
+                stream.seek(0)
+                stream.truncate()
                 image_bytes = image.tobytes()
                 if conected_socket:
                     try:
@@ -71,19 +93,12 @@ def main():
                         conected_socket = None
                     except Exception as e:
                         print(e)
-
-                # start_time = time.time()
-                # label_id, prob = classify_image(interpreter, image)
-                # elapsed_ms = (time.time() - start_time) * 1000
-                stream.seek(0)
-                stream.truncate()
-                # print("{0} {1}\n{2}ms".format(
-                #     labels[label_id], prob, elapsed_ms))
-                # camera.annotate_text = '%s %.2f\n%.1fms' % (labels[label_id], prob,
-                #                                             elapsed_ms)
-        finally:
-            pass
-            # camera.stop_preview()
+                master_queue.put(image)
+                if worker_queue.qsize != 0:
+                    label, prob, elapsed_ms = worker_queue.get()
+                    print("{0} {1}\n{2}ms".format(label, prob, elapsed_ms))
+    finally:
+        master_queue.put(False)
 
 
 def server_main():

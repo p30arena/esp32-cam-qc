@@ -13,7 +13,7 @@ train_dir = os.path.join(PATH, 'train')
 validation_dir = os.path.join(PATH, 'validation')
 
 BATCH_SIZE = 32
-IMG_SIZE = (240, 240)
+IMG_SIZE = (96, 96)
 
 train_dataset = tf.keras.utils.image_dataset_from_directory(train_dir,
                                                             shuffle=True,
@@ -75,7 +75,7 @@ print('Labels:\n', label_batch)
 plt.figure(figsize=(10, 10))
 for i in range(9):
     ax = plt.subplot(3, 3, i + 1)
-    plt.imshow(image_batch[i].astype("uint8"))
+    plt.imshow(image_batch[i].astype("uint8"), cmap='gray', vmin=0, vmax=255)
     plt.title(class_names[predictions[i]])
     plt.axis("off")
 
