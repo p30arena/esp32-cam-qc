@@ -1,7 +1,12 @@
 const { Interpreter } = require("node-tflite");
 
-const model = new Interpreter(require('fs').readFileSync("../efficientnet/out/model-backup/model.tflite"));
+const model = new Interpreter(require('fs').readFileSync("../efficientnet/out/model/model.tflite"));
 model.allocateTensors();
+
+console.log(model.inputs[0].type);
+console.log(model.inputs[0].byteSize);
+console.log(model.outputs[0].type);
+console.log(model.outputs[0].byteSize);
 
 function sigmoid(x) {
   return 1 / (1 + Math.exp(-x));

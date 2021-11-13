@@ -67,7 +67,7 @@ def main():
                 if conected_socket:
                     try:
                         conected_socket.sendall(image_bytes)
-                    except BrokenPipeError:
+                    except (BrokenPipeError, ConnectionResetError):
                         conected_socket = None
                     except Exception as e:
                         print(e)

@@ -31,12 +31,12 @@ def representative_dataset():
 
 if model_path.exists():
     model = tf.keras.models.load_model(model_path)
-    model = tf.keras.Sequential([
-        model.layers[0],  # input
-        model.layers[2],  # efficientnetb0
-        model.layers[3],  # global_avg_pooling2d
-        model.layers[5],  # dense
-    ])
+    inputs = tf.keras.Input(shape=IMG_SHAPE)
+    x = model.layers[2](inputs)  # efficientnetb0
+    x = model.layers[3](x)  # global_avg_pooling2d
+    x = model.layers[4](x)  # batch_norm_2d
+    outputs = model.layers[6](x)  # dense
+    model = tf.keras.Model(inputs, outputs)
 else:
     print("you must first run trian.py")
     exit(1)
@@ -45,18 +45,10 @@ converter = tf.lite.TFLiteConverter.from_keras_model(model)
 converter.optimizations = [tf.lite.Optimize.DEFAULT]
 converter.representative_dataset = representative_dataset
 converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
-converter.inference_input_type = tf.int8  # or tf.uint8
-converter.inference_output_type = tf.int8  # or tf.uint8
+converter.inference_input_type = tf.int8
+converter.inference_output_type = tf.int8
 tflite_model = converter.convert()
-bytes = hexdump.dump(tflite_model).split(' ')
-c_array = ', '.join(['0x%02x' % int(byte, 16) for byte in bytes])
-c = 'const unsigned char model_data[] __attribute__((aligned(8))) = {%s};' % (
-    c_array)
-c += '\nconst int model_data_len = %d;' % (len(bytes))
-c_code = c
 
 # Save the model to disk
 with open("out/model/model.tflite", "wb") as file:
     file.write(tflite_model)
-with open("out/model/model.c", "wb") as file:
-    file.write(str.encode(c_code))

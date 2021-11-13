@@ -55,9 +55,9 @@ class RandomSaturationLayer(tf.keras.layers.Layer):
 
 data_augmentation = tf.keras.Sequential([
     tf.keras.layers.RandomFlip('horizontal'),
-    tf.keras.layers.RandomRotation(0.02),
-    tf.keras.layers.RandomZoom((-0.1, -0.0)),
-    RandomSaturationLayer((0.1, 0.4)),
+    tf.keras.layers.RandomRotation(0.01),
+    tf.keras.layers.RandomZoom((-0.65, -0.0)),
+    RandomSaturationLayer((0.1, 1.0)),
 ])
 
 # efficientnet expects floating [0, 255]

@@ -58,7 +58,7 @@ else:
     exit(1)
 
 # Retrieve a batch of images from the test set
-image_batch, label_batch = train_dataset.as_numpy_iterator().next()
+image_batch, label_batch = validation_dataset.as_numpy_iterator().next()
 predictions = model.predict_on_batch(image_batch).flatten()
 
 # Apply a sigmoid since our model returns logits

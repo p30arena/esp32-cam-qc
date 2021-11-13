@@ -64,8 +64,8 @@ class RandomSaturationLayer(tf.keras.layers.Layer):
 
 data_augmentation = tf.keras.Sequential([
     tf.keras.layers.RandomFlip('horizontal'),
-    tf.keras.layers.RandomRotation(0.02),
-    # tf.keras.layers.RandomZoom((-0.1, -0.0)),
+    tf.keras.layers.RandomRotation(0.01),
+    tf.keras.layers.RandomZoom((-0.65, -0.0)),
     RandomSaturationLayer((0.1, 1.0)),
 ])
 
@@ -81,8 +81,6 @@ data_augmentation = tf.keras.Sequential([
 # exit(0)
 
 # efficientnet expects floating [0, 255]
-# preprocess_input = tf.keras.applications.mobilenet_v2.preprocess_input
-# rescale = tf.keras.layers.Rescaling(1./127.5, offset=-1) # scales [0, 255] to [-1, 1]
 
 # Create the base model from the pre-trained model MobileNet V2
 IMG_SHAPE = IMG_SIZE + (3,)
@@ -100,8 +98,6 @@ else:
                                                                    weights='imagenet')
 
     image_batch, label_batch = next(iter(train_dataset))
-    feature_batch = base_model(image_batch)
-    print(feature_batch.shape)
 
     # freeze
     base_model.trainable = False
@@ -109,31 +105,21 @@ else:
     # Let's take a look at the base model architecture
     base_model.summary()
 
-    global_average_layer = tf.keras.layers.GlobalAveragePooling2D()
-    feature_batch_average = global_average_layer(feature_batch)
-    print(feature_batch_average.shape)
-
-    prediction_layer = tf.keras.layers.Dense(1)
-    prediction_batch = prediction_layer(feature_batch_average)
-    print(prediction_batch.shape)
-
     inputs = tf.keras.Input(shape=IMG_SHAPE)
     x = data_augmentation(inputs)
-    # x = preprocess_input(x)
     x = base_model(x, training=False)
-    x = global_average_layer(x)
+    x = tf.keras.layers.GlobalAveragePooling2D()(x)
+    x = tf.keras.layers.BatchNormalization()(x)
     x = tf.keras.layers.Dropout(0.2)(x)
-    outputs = prediction_layer(x)
+    outputs = tf.keras.layers.Dense(1)(x)
     model = tf.keras.Model(inputs, outputs)
 
-base_learning_rate = 0.0001
+base_learning_rate = 0.001
 model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=base_learning_rate),
               loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),
               metrics=['accuracy'])
 
 model.summary()
-
-len(model.trainable_variables)
 
 
 loss0, accuracy0 = model.evaluate(validation_dataset)
@@ -141,12 +127,24 @@ loss0, accuracy0 = model.evaluate(validation_dataset)
 print("initial loss: {:.2f}".format(loss0))
 print("initial accuracy: {:.2f}".format(accuracy0))
 
-initial_epochs = 600
+
+def lr_scheduler(epoch, lr):
+    if epoch <= 15:
+        return 0.001
+    else:
+        return 0.0001
+
+
+initial_epochs = 100
 history = model.fit(train_dataset,
                     epochs=initial_epochs,
                     validation_data=validation_dataset,
-                    callbacks=tf.keras.callbacks.EarlyStopping(
-                        verbose=1, patience=30),
+                    callbacks=[
+                        tf.keras.callbacks.LearningRateScheduler(
+                            lr_scheduler, verbose=0),
+                        tf.keras.callbacks.EarlyStopping(
+                            verbose=1, patience=30),
+                    ],
                     )
 
 model.save(model_path, options=tf.saved_model.SaveOptions(
